@@ -113,9 +113,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: HomeRouterConfigEntry) -
     coordinator.port_forward_names = _port_forward_names(entry)
     entry.async_on_unload(entry.add_update_listener(_async_entry_updated))
     # Platforms set up concurrently; the router device must exist before any
-    # port-forward device names it as via_device, or the link is silently dropped.
-    dr.async_get(hass).async_get_or_create(
-        config_entry_id=entry.entry_id, **router_device_info(coordinator)
+    # port-forward device links to it, or the link is silently dropped.
+    coordinator.router_device_id = (
+        dr.async_get(hass)
+        .async_get_or_create(config_entry_id=entry.entry_id, **router_device_info(coordinator))
+        .id
     )
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True

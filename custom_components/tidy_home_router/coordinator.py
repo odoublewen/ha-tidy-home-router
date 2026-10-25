@@ -49,6 +49,8 @@ class HomeRouterCoordinator(DataUpdateCoordinator[list[PortForward]]):
         self.rebooting = False
         #: Port-forward subentries at setup, so a deleted one's rule can be removed.
         self.port_forward_names: dict[str, str] = {}
+        #: Registry id of the router's device, which the port-forward devices link to.
+        self.router_device_id = ""
 
     async def async_call[T](self, action: Callable[[Router], Awaitable[T]]) -> T:
         """Run ``action`` against the router, logging in again if the session expired."""
