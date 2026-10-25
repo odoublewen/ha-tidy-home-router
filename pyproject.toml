@@ -5,19 +5,19 @@ description = "Home Assistant integration for home routers: port forwarding swit
 readme = "README.md"
 license = "MIT"
 authors = [{ name = "Owen Solberg" }]
-requires-python = ">=3.13.2"
+requires-python = ">=3.14.2"
 dependencies = []
 
 [dependency-groups]
 dev = [
-    "pytest-homeassistant-custom-component==0.13.286",
+    "pytest-homeassistant-custom-component==0.13.375",
     "ruff>=0.6",
-    # aiodns 3.5 (pinned by HA 2025.10) breaks on pycares 5.
-    "pycares<5",
 ]
 
 [tool.ruff]
 line-length = 100
+# Tests run on 3.14, but the integration still supports HA 2025.10 on Python 3.13.
+target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
