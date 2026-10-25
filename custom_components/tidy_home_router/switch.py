@@ -6,7 +6,7 @@ from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigSubentry
-from homeassistant.const import CONF_NAME
+from homeassistant.const import CONF_NAME, MAJOR_VERSION, MINOR_VERSION
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -25,6 +25,8 @@ from .entity import HomeRouterEntity
 from .router import PortForward, Protocol
 
 PARALLEL_UPDATES = 1
+
+HA_VERSION = (MAJOR_VERSION, MINOR_VERSION)
 
 
 async def async_setup_entry(
@@ -77,8 +79,13 @@ class PortForwardSwitch(HomeRouterEntity, SwitchEntity):
             name=subentry.title,
             model="Port forward",
             entry_type=DeviceEntryType.SERVICE,
-            via_device=(DOMAIN, entry_id),
         )
+        # HA 2026.8 links devices by registry id and deprecates via_device; older
+        # versions only know via_device.
+        if HA_VERSION >= (2026, 8):
+            self._attr_device_info["via_device_id"] = coordinator.router_device_id
+        else:
+            self._attr_device_info["via_device"] = (DOMAIN, entry_id)
 
     def _live(self) -> list[PortForward]:
         """Rules on the router carrying this switch's name (two for tcp+udp)."""

@@ -212,8 +212,12 @@ async def test_port_forwards_get_their_own_device(hass: HomeAssistant, router, l
     devices = dr.async_get(hass)
     entities = er.async_get(hass)
     (subentry,) = loaded.subentries.values()
-    router_device = devices.async_get_device(identifiers={(DOMAIN, loaded.entry_id)})
-    assert router_device.config_entries_subentries == {loaded.entry_id: {None}}
+    router_device = devices.async_get(entities.async_get(BUTTON).device_id)
+    assert router_device.identifiers == {(DOMAIN, loaded.entry_id)}
+    if hasattr(router_device, "config_subentry_id"):  # HA 2026.8+
+        assert router_device.config_subentry_id is None
+    else:
+        assert router_device.config_entries_subentries == {loaded.entry_id: {None}}
 
     switch = entities.async_get(SWITCH)
     assert switch.config_subentry_id == subentry.subentry_id
@@ -221,7 +225,6 @@ async def test_port_forwards_get_their_own_device(hass: HomeAssistant, router, l
     assert forward_device.id != router_device.id
     assert forward_device.via_device_id == router_device.id
     assert forward_device.name == "ssh"
-    assert entities.async_get(BUTTON).device_id == router_device.id
 
 
 # -- reboot ------------------------------------------------------------------
